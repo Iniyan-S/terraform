@@ -4,7 +4,7 @@ resource "aws_default_route_table" "myvpc-public-rt" {
   default_route_table_id = aws_vpc.myvpc.default_route_table_id
 
   route {
-    cidr_block = "0.0.0.0/0"
+    cidr_block = var.route_outbound_cidr
     gateway_id = aws_internet_gateway.myvpc-igw.id
   }
 
@@ -19,7 +19,7 @@ resource "aws_route_table" "myvpc-private-rt" {
     vpc_id = aws_vpc.myvpc.id
 
     route {
-        cidr_block = "0.0.0.0/0"
+        cidr_block = var.route_outbound_cidr
         nat_gateway_id = aws_nat_gateway.myvpc-nat-gw.id
     }
 

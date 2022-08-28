@@ -1,7 +1,7 @@
 # Create VPC
 
 resource "aws_vpc" "myvpc" {
-  cidr_block = "192.168.0.0/16"
+  cidr_block = var.vpc_cidr
   instance_tenancy = "default"
 
   tags = {
