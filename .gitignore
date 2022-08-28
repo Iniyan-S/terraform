@@ -1,0 +1,6 @@
+.vscode
+.gitignore
+.terraform/
+.terraform.*
+terraform.tfstate*
+WSL1/
