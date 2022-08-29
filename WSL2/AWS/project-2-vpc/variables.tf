@@ -6,12 +6,15 @@ variable "reg" {
     description = "VPC Region"
 }
 
+# Define VPC CIDR Block
 
 variable "vpc_cidr" {
     default = "192.168.0.0/16"
     type = string
     description = "Define VPC CIDR block"
 }
+
+# Define Subnet Values
 
 # variable "subnet" {
 #     type = object({
@@ -61,6 +64,8 @@ variable "subnet" {
         }
     }
 }
+
+# Define Route Tables Outbound/Destination CIDR Block
 
 variable "route_outbound_cidr" {
     default = "0.0.0.0/0"
