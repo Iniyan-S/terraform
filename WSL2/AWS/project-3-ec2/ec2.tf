@@ -17,6 +17,7 @@ resource "aws_instance" "web" {
   key_name = var.key-name
   subnet_id = data.terraform_remote_state.myvpc.outputs.public-subnet-1-id
   security_groups = [data.terraform_remote_state.myvpc.outputs.default-sg-id]
+  iam_instance_profile = aws_iam_instance_profile.instance-profile.name
 
   tags = {
     "Name" = "Web Host"
