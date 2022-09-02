@@ -21,3 +21,11 @@ output "private-subnet-2-id" {
 output "default-sg-id" {
   value = aws_default_security_group.myvpc-default-sg.id
 }
+
+output "elb-sg-id" {
+  value = aws_security_group.elb-sg.id
+}
+
+output "app-sg-id" {
+  value = aws_security_group.app-sg.id
+}
