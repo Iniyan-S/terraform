@@ -5,7 +5,7 @@ This repo is a companion repo to the [Provision a GKE Cluster learn guide](https
 This sample repo also creates a VPC and subnet for the GKE cluster. This is not
 required but highly recommended to keep your GKE cluster isolated.
 
-This is forked and updated to use default node pool, as conflicted with quotas set for Kode Kloud playground policy.
+This is forked and updated to use default node pool, as it conflicted with quotas set for Kode Kloud playground policy.
 
 ## Perform Below Steps
 
