@@ -22,7 +22,7 @@ data "aws_ami" "amazon-linux" {
   }
 
   filter {
-    name = "virtualization_type"
+    name = "virtualization-type"
     values = [ "hvm" ]
   }
 }
