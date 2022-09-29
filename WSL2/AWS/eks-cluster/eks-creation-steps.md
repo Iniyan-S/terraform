@@ -9,6 +9,7 @@
 1. Create an Amazon VPC with public and private subnets that meets Amazon EKS requirements
     - Create VPC - my-eks, range 192.168.0.0/16
     - Create subnet - my-eks-sn-01 (ap-south-1a) (192.168.1.0/24) & my-eks-sn-02 (ap-south-1b) (192.168.2.0/24) & enable auto-assign Public IP
+      - Subnets must have tag "kubernetes.io/cluster/CLUSTER_NAME" = "shared" to associate with EKS Node Groups later.
     - Associate two subnets to defautl route table
     - Create IGW, under VPC my-eks
     - Edit default route table, 0.0.0.0/0 -> IGW
@@ -33,83 +34,9 @@
 }
 
 ```
- - Attach AWS Managed - EKS Cluster Policy "AmazonEKSClusterPolicy" to role "my-eks-cluster-role"
+ - Attach AWS Managed - EKS Cluster Policy "AmazonEKSClusterPolicy" to role "my-eks-cluster-role" (Policy ARN: arn:aws:iam::aws:policy/AmazonEKSClusterPolicy)
 ```
-{
-            "Effect": "Allow",
-            "Action": [
-                "autoscaling:DescribeAutoScalingGroups",
-                "autoscaling:UpdateAutoScalingGroup",
-                "ec2:AttachVolume",
-                "ec2:AuthorizeSecurityGroupIngress",
-                "ec2:CreateRoute",
-                "ec2:CreateSecurityGroup",
-                "ec2:CreateTags",
-                "ec2:CreateVolume",
-                "ec2:DeleteRoute",
-                "ec2:DeleteSecurityGroup",
-                "ec2:DeleteVolume",
-                "ec2:DescribeInstances",
-                "ec2:DescribeRouteTables",
-                "ec2:DescribeSecurityGroups",
-                "ec2:DescribeSubnets",
-                "ec2:DescribeVolumes",
-                "ec2:DescribeVolumesModifications",
-                "ec2:DescribeVpcs",
-                "ec2:DescribeDhcpOptions",
-                "ec2:DescribeNetworkInterfaces",
-                "ec2:DetachVolume",
-                "ec2:ModifyInstanceAttribute",
-                "ec2:ModifyVolume",
-                "ec2:RevokeSecurityGroupIngress",
-                "ec2:DescribeAccountAttributes",
-                "ec2:DescribeAddresses",
-                "ec2:DescribeInternetGateways",
-                "elasticloadbalancing:AddTags",
-                "elasticloadbalancing:ApplySecurityGroupsToLoadBalancer",
-                "elasticloadbalancing:AttachLoadBalancerToSubnets",
-                "elasticloadbalancing:ConfigureHealthCheck",
-                "elasticloadbalancing:CreateListener",
-                "elasticloadbalancing:CreateLoadBalancer",
-                "elasticloadbalancing:CreateLoadBalancerListeners",
-                "elasticloadbalancing:CreateLoadBalancerPolicy",
-                "elasticloadbalancing:CreateTargetGroup",
-                "elasticloadbalancing:DeleteListener",
-                "elasticloadbalancing:DeleteLoadBalancer",
-                "elasticloadbalancing:DeleteLoadBalancerListeners",
-                "elasticloadbalancing:DeleteTargetGroup",
-                "elasticloadbalancing:DeregisterInstancesFromLoadBalancer",
-                "elasticloadbalancing:DeregisterTargets",
-                "elasticloadbalancing:DescribeListeners",
-                "elasticloadbalancing:DescribeLoadBalancerAttributes",
-                "elasticloadbalancing:DescribeLoadBalancerPolicies",
-                "elasticloadbalancing:DescribeLoadBalancers",
-                "elasticloadbalancing:DescribeTargetGroupAttributes",
-                "elasticloadbalancing:DescribeTargetGroups",
-                "elasticloadbalancing:DescribeTargetHealth",
-                "elasticloadbalancing:DetachLoadBalancerFromSubnets",
-                "elasticloadbalancing:ModifyListener",
-                "elasticloadbalancing:ModifyLoadBalancerAttributes",
-                "elasticloadbalancing:ModifyTargetGroup",
-                "elasticloadbalancing:ModifyTargetGroupAttributes",
-                "elasticloadbalancing:RegisterInstancesWithLoadBalancer",
-                "elasticloadbalancing:RegisterTargets",
-                "elasticloadbalancing:SetLoadBalancerPoliciesForBackendServer",
-                "elasticloadbalancing:SetLoadBalancerPoliciesOfListener",
-                "kms:DescribeKey"
-            ],
-            "Resource": "*"
-        },
-        {
-            "Effect": "Allow",
-            "Action": "iam:CreateServiceLinkedRole",
-            "Resource": "*",
-            "Condition": {
-                "StringEquals": {
-                    "iam:AWSServiceName": "elasticloadbalancing.amazonaws.com"
-                }
-            }
-
+["AmazonEKSClusterPolicy"]
 ```
 3. Create Cluter
     - Name: my-eks-cluster
@@ -142,7 +69,7 @@ kubernetes   ClusterIP   10.100.0.1   <none>        443/TCP   66m
 
 ## Create Nodes
 
-1. Create a node IAM role and attach the required Amazon EKS IAM managed policy to it.
+1. Create a node IAM role and attach the required Amazon EKS IAM managed policies to it.
     - Create Role : my-eks-node-role
     - Trusted entity type : "Service": "ec2.amazonaws.com"
  ```
