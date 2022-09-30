@@ -3,12 +3,13 @@
 resource "aws_eks_cluster" "my-eks-cluster" {
     name = "my-eks-cluster"
     role_arn = aws_iam_role.my-eks-cluster-role.arn
-    # version = "1.21"
+    version = "1.21"
     vpc_config {
       subnet_ids = [ aws_subnet.my-eks-sn-01.id, aws_subnet.my-eks-sn-02.id ]
+      endpoint_private_access = true
       endpoint_public_access = true
       public_access_cidrs = [ "115.99.14.220/32" ] # Indicates which CIDR blocks can access the Amazon EKS public API server endpoint when enabled
-    #   security_group_ids = aws_vpc.my-eks-vpc.default_security_group_id
+      # security_group_ids = aws_vpc.my-eks-vpc.default_security_group_id
     }
 
     kubernetes_network_config {
@@ -23,7 +24,6 @@ resource "aws_eks_cluster" "my-eks-cluster" {
     }
   
 }
-
 
 output "endpoint" {
     value = aws_eks_cluster.my-eks-cluster.endpoint
