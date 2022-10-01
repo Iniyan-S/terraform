@@ -2,7 +2,8 @@
 
 - https://docs.aws.amazon.com/eks/latest/userguide/getting-started-console.html
 - https://docs.aws.amazon.com/eks/latest/userguide/create-cluster.html
-
+- https://docs.aws.amazon.com/eks/latest/userguide/autoscaling.html
+- https://www.youtube.com/watch?v=lMb6wzy0PPA&t=1s
 
 ## Create EKS Cluster
 
@@ -57,6 +58,8 @@
 
 ```
 aws eks update-kubeconfig --region region-code --name my-cluster
+(OR)
+aws eks update-kubeconfig --name $(terraform output -raw eks-cluster-name) --region $(terraform output -raw cluster-region)
 ```
 3. Test configuration
 
@@ -131,3 +134,69 @@ kubernetes   ClusterIP   10.100.0.1   <none>        443/TCP   66m
     - Node group network configuration:
         - Subnets: Created in the EKS VPC 
         - enable SSH access to nodes (provide ssh key pair, allow ssh remote access from security group (have it creted already with allowed source ips))
+
+## Deploy Cluster Autoscaler
+
+Ref: https://docs.aws.amazon.com/eks/latest/userguide/autoscaling.html
+
+1. Download Cluster Autoscaler YAML file.
+```
+curl -o cluster-autoscaler-autodiscover.yaml https://raw.githubusercontent.com/kubernetes/autoscaler/master/cluster-autoscaler/cloudprovider/aws/examples/cluster-autoscaler-autodiscover.yaml
+```
+2. Update the downnloaded yaml file as below,
+
+ - Add Annotations, under spec.template.metadata.annootations "cluster-autoscaler.kubernetes.io/safe-to-evict: 'false'"
+  ```
+  spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cluster-autoscaler
+  template:
+    metadata:
+      labels:
+        app: cluster-autoscaler
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '8085'
+        cluster-autoscaler.kubernetes.io/safe-to-evict: 'false'
+```
+ - Update the cluster-autoscaler container command to add the following options and **CLUSTER_NAME**
+    - --balance-similar-node-groups
+    - --skip-nodes-with-system-pods=false
+    - --node-group-auto-discovery=asg:tag=k8s.io/cluster-autoscaler/enabled,k8s.io/cluster-autoscaler/**my-eks-cluster**
+
+ - Open the Cluster Autoscaler [release] page from GitHub in a web browser and find the latest Cluster Autoscaler version that matches the Kubernetes **major** and **minor** version of your cluster. For example, if the Kubernetes version of your cluster is 1.23, find the latest Cluster Autoscaler release that begins with 1.23. Record the semantic version number (1.23.n) for that release to use in the next step.
+
+ - Set the Cluster Autoscaler image tag to the version that you obtained in the previous step.
+   - image: k8s.gcr.io/autoscaling/cluster-autoscaler:**v1.21.3**
+
+```
+ containers:
+        - image: k8s.gcr.io/autoscaling/cluster-autoscaler:v1.21.3
+          name: cluster-autoscaler
+          resources:
+            limits:
+              cpu: 100m
+              memory: 600Mi
+            requests:
+              cpu: 100m
+              memory: 600Mi
+          command:
+            - ./cluster-autoscaler
+            - --v=4
+            - --stderrthreshold=info
+            - --cloud-provider=aws
+            - --skip-nodes-with-local-storage=false
+            - --expander=least-waste
+            - --node-group-auto-discovery=asg:tag=k8s.io/cluster-autoscaler/enabled,k8s.io/cluster-autoscaler/my-eks-cluster
+            - --balance-similar-node-groups
+            - --skip-nodes-with-system-pods=false
+```
+
+[release]: <https://github.com/kubernetes/autoscaler/releases>
+
+- Apply the YAML file to your cluster.
+```
+kubectl apply -f cluster-autoscaler-autodiscover.yaml
+```

@@ -14,11 +14,13 @@ resource "aws_eks_node_group" "my-eks-ng-dev" {
     ec2_ssh_key = "in-user"
     source_security_group_ids = [ aws_security_group.my-eks-ng-sg.id ]
   }
-  taint {
-    key = "env"
-    value = "dev"
-    effect = "NO_SCHEDULE"
-  }
+
+  # Commented below as it interferes with coredns and cluster-autoscaler deployment
+  # taint {
+  #   key = "env"
+  #   value = "dev"
+  #   effect = "NO_SCHEDULE"
+  # }
 
   scaling_config {
     desired_size = 2
